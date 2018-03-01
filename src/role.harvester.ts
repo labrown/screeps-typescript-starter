@@ -1,3 +1,5 @@
+import * as roleBuilder from "./role.builder";
+
 export function run(creep: Creep) {
     if(creep.carry.energy < creep.carryCapacity) {
         var sources = creep.room.find(FIND_SOURCES);
@@ -17,6 +19,9 @@ export function run(creep: Creep) {
             if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.travelTo(target, {visualizePathStyle: {stroke: '#ffffff'}} as TravelToOptions);
             }
+        } else {
+            roleBuilder.run(creep);                
         }
+        
     }
 };
