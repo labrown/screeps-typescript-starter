@@ -1,10 +1,12 @@
+import * as  roleUpgrader from "./role.upgrader";
+
 export function run(creep: Creep) {
 
 	if(creep.memory.building && creep.carry.energy == 0) {
 		creep.memory.building = false;
 		creep.say('🔄 harvest');
 	}
-	if(!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
+	else if(!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
 		creep.memory.building = true;
 		creep.say('🚧 build');
 	}
@@ -15,6 +17,11 @@ export function run(creep: Creep) {
 			if(creep.build(target) == ERR_NOT_IN_RANGE) {
 				creep.travelTo(target, {visualizePathStyle: {stroke: '#ffffff'}} as TravelToOptions);
 			}
+		}
+		else { 
+			creep.memory.role = 'upgrader';
+			delete creep.memory.building;
+			roleUpgrader.run(creep);
 		}
 	}
 	else {
