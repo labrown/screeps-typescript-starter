@@ -19,7 +19,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
         }
     }
 
-    let tower = Game.getObjectById('46c6c8d6ee5484d6601078e3') as StructureTower;
+    let tower = Game.getObjectById('543642c1cd00309') as StructureTower;
     if (tower) {
         var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => structure.hits < structure.hitsMax
