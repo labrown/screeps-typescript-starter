@@ -6,11 +6,27 @@ import "Traveler/Traveler";
 // import * as roleUpgrader from "./role.upgrader";
 // import * as roleRepairer from "./role.repairer";
 
+interface CreepMemory { 
+    role?: string,
+    building?: boolean,
+    upgrading?: boolean,
+    loading?: boolean,
+    source_id?: string,
+    working?: boolean
+}
+
 import { RoomMgr } from "./RoomMgr";
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
+
+    // Automatically delete memory of missing creeps
+    for (const name in Memory.creeps) {
+        if (!(name in Game.creeps)) {
+            delete Memory.creeps[name];
+        }
+    }
 
     // hash of rooms
     let theRooms:  { [id: string]: RoomMgr} = {};
@@ -21,28 +37,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
     // // console.log("Current game tick is " + Game.time);
 
-    // // Automatically delete memory of missing creeps
-    // for (const name in Memory.creeps) {
-    //     if (!(name in Game.creeps)) {
-    //         delete Memory.creeps[name];
-    //     }
-    // }
-
-    // let tower = Game.getObjectById('543642c1cd00309') as StructureTower;
-    // if (tower) {
-    //     var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-    //         filter: (structure) => structure.hits < structure.hitsMax
-    //     });
-    //     if (closestDamagedStructure) {
-    //         tower.repair(closestDamagedStructure);
-    //     }
-
-    //     var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-    //     if (closestHostile) {
-    //         tower.attack(closestHostile);
-    //     }
-    // }
-
+    
     // for (var name in Game.creeps) {
     //     var creep = Game.creeps[name];
     //     if (creep.memory.role == 'harvester') {
