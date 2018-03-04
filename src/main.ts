@@ -1,21 +1,7 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import "Traveler/Traveler";
 
-// import * as roleBuilder from "./role.builder";
-// import * as roleHarvester from "./role.harvester";
-// import * as roleUpgrader from "./role.upgrader";
-// import * as roleRepairer from "./role.repairer";
-
-interface CreepMemory { 
-    role?: string,
-    building?: boolean,
-    upgrading?: boolean,
-    loading?: boolean,
-    source_id?: string,
-    working?: boolean
-}
-
-import { RoomMgr } from "./RoomMgr";
+import { RoomRunner } from "./RoomRunner";
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
@@ -28,28 +14,13 @@ export const loop = ErrorMapper.wrapLoop(() => {
         }
     }
 
-    // hash of rooms
-    let theRooms:  { [id: string]: RoomMgr} = {};
-
-    for (let name in Game.rooms) {
-        theRooms[name] = new RoomMgr(name);
+    // Initialize memory if needed
+    if (typeof Memory.crit === 'undefined') {
+        Memory.crit = {};
     }
-
-    // // console.log("Current game tick is " + Game.time);
-
     
-    // for (var name in Game.creeps) {
-    //     var creep = Game.creeps[name];
-    //     if (creep.memory.role == 'harvester') {
-    //         roleHarvester.run(creep);
-    //     } else if (creep.memory.role == 'repairer') {
-    //         roleRepairer.run(creep);
-    //     } else if (creep.memory.role == 'upgrader') {
-    //         roleUpgrader.run(creep);
-    //     } else if (creep.memory.role == 'builder') {
-    //         roleBuilder.run(creep);
-    //     }
-    // }
-
-
+    let rooms:  { [id: string]: RoomRunner} = {};
+    for (let name in Game.rooms) {
+        rooms[name] = new RoomRunner(name);
+    }
 });

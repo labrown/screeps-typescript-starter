@@ -1,10 +1,10 @@
-import { RoomMgr } from "RoomMgr";
+import { RoomRunner } from "RoomRunner";
 
 export class TowerRunner {
 
-    room: RoomMgr;
+    room: RoomRunner;
 
-    constructor(room: RoomMgr) {
+    constructor(room: RoomRunner) {
         this.room = room;
     };
 

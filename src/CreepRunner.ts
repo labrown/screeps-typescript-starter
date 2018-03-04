@@ -1,10 +1,46 @@
-import { RoomMgr } from "RoomMgr";
+import { RoomRunner } from "RoomRunner";
+
+interface CritterTraits {
+    stepAway: boolean,
+    pave: boolean,
+}
+
+const OtherWay: { [id: string]: DirectionConstant } = {
+    1: 5,
+    2: 6,
+    3: 7,
+    4: 8,
+    5: 1,
+    6: 2,
+    7: 3,
+    8: 4
+};
+
+
+const traits: { [id: string]: CritterTraits } = {
+    'builder': {
+        stepAway: true,
+        pave: false,
+    },
+    'harvester': {
+        stepAway: true,
+        pave: false,
+    },
+    'upgrader': {
+        stepAway: true,
+        pave: false,
+    },
+    'paver': {
+        stepAway: true,
+        pave: false,
+    }
+};
 
 export class CreepRunner {
 
-    room: RoomMgr;
+    room: RoomRunner;
 
-    constructor(room: RoomMgr) {
+    constructor(room: RoomRunner) {
         this.room = room;
     };
 
@@ -17,46 +53,69 @@ export class CreepRunner {
             else if (!creep.memory.working && creep.carry.energy == creep.carryCapacity) {
                 creep.memory.working = true;
                 creep.say('🚧 working');
+                if (traits[creep.memory.role].stepAway) {
+                    this.stepAway(creep)
+                };
             }
 
-
             if (creep.memory.working) {
+                if (traits[creep.memory.role].pave) {
+                    this.construct_road_site(creep);
+                }
+
                 switch (creep.memory.role) {
-                    case "harvester": this.harvester_work(creep);
+                    case "harvester":
+                        this.harvester_work(creep);
                         break;
-                    case "builder": this.builder_work(creep);
+                    case "builder":
+                        this.builder_work(creep);
                         break;
-                    case "upgrader": this.upgrader_work(creep);
+                    case "upgrader":
+                        this.upgrader_work(creep);
+                        break;
+                    case "paver":
+                        this.paver_work(creep);
                         break;
                 }
             }
             else {
                 switch (creep.memory.role) {
-                    case "harvester": this.harvester_load(creep);
+                    case "harvester":
+                        this.harvester_load(creep);
                         break;
-                    case "builder": this.builder_load(creep);
+                    case "builder":
+                        this.builder_load(creep);
                         break;
-                    case "upgrader": this.upgrader_load(creep);
+                    case "upgrader":
+                        this.upgrader_load(creep);
+                        break;
+                    case "paver":
+                        this.paver_load(creep);
                         break;
                 }
             }
 
-            // Set down road if possible
-            let controller = this.room.room.controller as StructureController;
-            if (controller.my) {
-                let roads = _.filter(this.room.structures, function (s) {
-                    return (s.pos.x == creep.pos.x && s.pos.y == creep.pos.y)
-                });
-                let sites = _.filter(this.room.sites, function (s) {
-                    return (s.pos.x == creep.pos.x && s.pos.y == creep.pos.y)
-                });
-                if (roads.length == 0 && sites.length == 0) {
-                    console.log(`creating road at ${creep.pos.x},${creep.pos.y} in ${this.room.name}`);
-                    this.room.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
-                }
+        }
+    }
+
+    construct_road_site(creep: Creep) {
+        // Set down road if possible
+        let controller = this.room.room.controller as StructureController;
+        if (controller.my) {
+            let roads = _.filter(this.room.structures, function (s) {
+                return (s.pos.x == creep.pos.x && s.pos.y == creep.pos.y)
+            });
+            let sites = _.filter(this.room.sites, function (s) {
+                return (s.pos.x == creep.pos.x && s.pos.y == creep.pos.y)
+            });
+            if (roads.length == 0 && sites.length == 0) {
+                console.log(`${creep.name} laying road at ${creep.pos.x},${creep.pos.y} in ${this.room.name}`);
+                this.room.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
             }
         }
     }
+
+
 
     harvester_work(creep: Creep) {
         let target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
@@ -68,7 +127,7 @@ export class CreepRunner {
         });
         if (target) {
             if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.travelTo(target, { visualizePathStyle: { stroke: '#ffffff' } } as TravelToOptions);
+                creep.travelTo(target);
             }
         }
     }
@@ -76,15 +135,27 @@ export class CreepRunner {
     harvester_load(creep: Creep) {
         let source: Source = Game.getObjectById(creep.memory.source_id) as Source;
         if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-            creep.travelTo(source, { visualizePathStyle: { stroke: '#ffaa00' } } as TravelToOptions);
+            creep.travelTo(source);
         }
     }
 
+
     builder_work(creep: Creep) {
-        let target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+        let extension_sites = _.filter(this.room.sites, function (cs: ConstructionSite) {
+            return cs.structureType == STRUCTURE_EXTENSION
+        });
+
+        let target: ConstructionSite;
+        if (extension_sites.length > 0) {
+            target = _.sortBy(extension_sites, function (cs: ConstructionSite) {
+                return cs.progressTotal - cs.progress;
+            })[0];
+        } else {
+            target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+        }
         if (target) {
             if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                creep.travelTo(target, { visualizePathStyle: { stroke: '#ffffff' } } as TravelToOptions);
+                creep.travelTo(target, { range: 3 } as TravelToOptions);
             }
         }
     }
@@ -93,10 +164,27 @@ export class CreepRunner {
         this.loadFromSource(creep);
     }
 
+    paver_work(creep: Creep) {
+        let road_sites = _.filter(this.room.sites, function (cs: ConstructionSite) {
+            return cs.structureType == STRUCTURE_ROAD
+        });
+
+        let target = creep.pos.findClosestByPath(road_sites);
+        if (target) {
+            if (creep.build(target) == ERR_NOT_IN_RANGE) {
+                creep.travelTo(target, { range: 3 } as TravelToOptions);
+            }
+        }
+    }
+
+    paver_load(creep: Creep) {
+        this.loadFromSource(creep);
+    }
+
     upgrader_work(creep: Creep) {
         if (creep.upgradeController(creep.room.controller as StructureController) == ERR_NOT_IN_RANGE) {
             creep.travelTo(creep.room.controller as StructureController,
-                { visualizePathStyle: { stroke: '#ffffff' } } as TravelToOptions);
+                { range: 3 } as TravelToOptions);
         }
     }
 
@@ -104,10 +192,19 @@ export class CreepRunner {
         this.loadFromSource(creep);
     }
 
+
+
     loadFromSource(creep: Creep) {
         let source = creep.pos.findClosestByPath(FIND_SOURCES);
         if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-            creep.travelTo(source, { visualizePathStyle: { stroke: '#ffaa00' } } as TravelToOptions);
+            creep.travelTo(source);
         }
+    }
+
+    stepAway(creep: Creep) {
+        let source = creep.pos.findClosestByPath(FIND_SOURCES);
+        let step_dir = OtherWay[creep.pos.getDirectionTo(source)];
+        console.log(`${creep.name} stepping ${step_dir}`);
+        creep.move(step_dir);
     }
 }
