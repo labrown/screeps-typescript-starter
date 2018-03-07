@@ -36,10 +36,9 @@ export class CreepBreeder {
         // console.log(`growing ${role} with capacity ${capacity}'`);
         let body = this.bodies[role];
         let cost = this.bodyCost(body);
-        let capacity = (role == 'harvester' && this.room.headcounts[role] == 0) ? this.room.room.energyAvailable: this.room.room.energyCapacityAvailable;
+        let capacity = (role == 'harvester' && this.room.headcounts[role] < this.room.sources.length) ? this.room.room.energyAvailable: this.room.room.energyCapacityAvailable;
         let done = cost > capacity;
         let index = 0;
-         console.log(`${role} - ${this.room.headcounts[role]} -${body} - ${cost} - ${capacity} - ${done} - ${index}`);
         while (!done) {
             let part = this.bodies[role][index];
             cost += BODYPART_COST[part];
@@ -48,10 +47,8 @@ export class CreepBreeder {
             } else {
                 done = true;
             }
-            // console.log(`${body} - ${cost} - ${done} - ${index}`);
             index = (index + 1) % this.bodies[role].length;
         }
-        // console.log(`grew ${body}`);
         return body;
     }
 
