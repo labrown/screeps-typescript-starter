@@ -6,7 +6,7 @@ interface xy { x: number, y: number }
 const extension_sites: { [id: number]: xy[] } = {
     1: [],
     2: [{ x: 2, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 2, y: 2 }],
-    3: [],
+    3: [{ x: -2, y: 0 }, { x: -1, y: 1 }, { x: -2, y: 1 }, { x: -3, y: 1 }, { x: -2, y: 2 }],
     4: [],
     5: [],
     6: [],
@@ -16,7 +16,7 @@ const extension_sites: { [id: number]: xy[] } = {
 
 
 export class Planner {
-    
+
     room: RoomRunner;
 
     constructor(room: RoomRunner) {
@@ -78,7 +78,8 @@ export class Planner {
         }
         let controller = this.room.room.controller as StructureController;
 
-        if (!Memory.crit[this.room.name].ext[controller.level]) {
+        if (Memory.crit[this.room.name].ext[controller.level] == false) {
+            console.log(`Setting extensions for controller level ${controller.level}`);
             let spawn = this.room.spawns[0];
             for (let xy of extension_sites[controller.level]) {
                 this.room.room.createConstructionSite(spawn.pos.x + xy.x, spawn.pos.y + xy.y, STRUCTURE_EXTENSION);

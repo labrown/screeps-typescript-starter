@@ -118,13 +118,15 @@ export class CreepRunner {
 
 
     harvester_work(creep: Creep) {
-        let target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION ||
-                    structure.structureType == STRUCTURE_SPAWN ||
-                    structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity;
+        let target;
+        for (let struct of [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER]) {
+            if (this.room.energy_requests[struct].length > 0) {
+                target = creep.pos.findClosestByPath(this.room.energy_requests[struct]);
+                if (target) {
+                    break;
+                }
             }
-        });
+        }
         if (target) {
             if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.travelTo(target);
@@ -204,7 +206,7 @@ export class CreepRunner {
     stepAway(creep: Creep) {
         let source = creep.pos.findClosestByPath(FIND_SOURCES);
         let step_dir = OtherWay[creep.pos.getDirectionTo(source)];
-        console.log(`${creep.name} stepping ${step_dir}`);
+        // console.log(`${creep.name} stepping ${step_dir}`);
         creep.move(step_dir);
     }
 }

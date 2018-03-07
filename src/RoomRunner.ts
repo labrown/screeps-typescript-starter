@@ -19,6 +19,7 @@ export class RoomRunner {
     creepRunner: CreepRunner;
     creepBreeder?: CreepBreeder;
     towerRunner: TowerRunner;
+    energy_requests: {[id:string]: Structure[]} = {};
 
     constructor(room_name: string) {
         // name of this room
@@ -40,6 +41,20 @@ export class RoomRunner {
 
         // Get list of structures
         this.structures = this.room.find(FIND_MY_STRUCTURES);
+
+        // Get Extensions that need energy
+        this.energy_requests[STRUCTURE_EXTENSION] = _.filter(this.structures, function (s:StructureExtension) {
+            return s.structureType == STRUCTURE_EXTENSION && s.energy < s.energyCapacity
+        });
+
+        // Get Spawns that need energy
+        this.energy_requests[STRUCTURE_SPAWN] = _.filter(this.structures, function (s:StructureSpawn) {
+            return s.structureType == STRUCTURE_SPAWN && s.energy < s.energyCapacity
+        });
+        // Get Towers that need energy
+        this.energy_requests[STRUCTURE_TOWER] = _.filter(this.structures, function (s:StructureTower) {
+            return s.structureType == STRUCTURE_TOWER && s.energy < s.energyCapacity
+        });
 
         // Creeps in this room
         this.creeps = this.room.find(FIND_MY_CREEPS);
@@ -116,6 +131,7 @@ export class RoomRunner {
         })
         let builders_wanted = Math.ceil((this.sites.length - road_sites.length) / 10);
         if (builders_wanted > 3) { builders_wanted = 3; }
+        if (builders_wanted == 1) { builders_wanted = 2; }
         if (this.sites.length > 0 && builders.length < builders_wanted) {
             creepReqs.push({ name: "builder_" + Game.time, role: 'builder' });
         }
