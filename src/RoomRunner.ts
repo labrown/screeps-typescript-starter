@@ -116,7 +116,7 @@ export class RoomRunner {
         let upgraders = _.filter(this.creeps, function (creep) {
             return creep.memory.role == 'upgrader'
         })
-        if (upgraders.length < 4) {
+        if (upgraders.length < 3) {
             creepReqs.push({ name: "upgrader_" + Game.time, role: 'upgrader' });
         }
 
