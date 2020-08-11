@@ -54,6 +54,7 @@ export class CreepRunner {
                 creep.memory.working = true;
                 creep.say('🚧 working');
                 if (traits[creep.memory.role].stepAway) {
+                    creep.say('Stepping off');
                     this.stepAway(creep)
                 };
             }
@@ -135,7 +136,7 @@ export class CreepRunner {
     }
 
     harvester_load(creep: Creep) {
-        let source: Source = Game.getObjectById(creep.memory.source_id) as Source;
+        let source = Game.getObjectById(<Id<Source>> creep.memory.source_id) as Source;
         if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
             creep.travelTo(source);
         }
@@ -147,7 +148,7 @@ export class CreepRunner {
             return cs.structureType == STRUCTURE_EXTENSION
         });
 
-        let target: ConstructionSite;
+        let target: ConstructionSite | null;
         if (extension_sites.length > 0) {
             target = _.sortBy(extension_sites, function (cs: ConstructionSite) {
                 return cs.progressTotal - cs.progress;
@@ -157,7 +158,7 @@ export class CreepRunner {
         }
         if (target) {
             if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                creep.travelTo(target, { range: 3 } as TravelToOptions);
+                creep.travelTo(target, { range: 3 });
             }
         }
     }
@@ -174,7 +175,7 @@ export class CreepRunner {
         let target = creep.pos.findClosestByPath(road_sites);
         if (target) {
             if (creep.build(target) == ERR_NOT_IN_RANGE) {
-                creep.travelTo(target, { range: 3 } as TravelToOptions);
+                creep.travelTo(target, { range: 3 });
             }
         }
     }
@@ -186,7 +187,7 @@ export class CreepRunner {
     upgrader_work(creep: Creep) {
         if (creep.upgradeController(creep.room.controller as StructureController) == ERR_NOT_IN_RANGE) {
             creep.travelTo(creep.room.controller as StructureController,
-                { range: 3 } as TravelToOptions);
+                { range: 3 });
         }
     }
 
@@ -198,15 +199,24 @@ export class CreepRunner {
 
     loadFromSource(creep: Creep) {
         let source = creep.pos.findClosestByPath(FIND_SOURCES);
-        if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-            creep.travelTo(source);
+        if (creep.harvest(<Source>source) == ERR_NOT_IN_RANGE) {
+            creep.travelTo(<Source>source);
         }
     }
 
     stepAway(creep: Creep) {
-        let source = creep.pos.findClosestByPath(FIND_SOURCES);
-        let step_dir = OtherWay[creep.pos.getDirectionTo(source)];
-        // console.log(`${creep.name} stepping ${step_dir}`);
-        creep.move(step_dir);
+        let source:Source|null;
+        if (creep.memory.source_id) { 
+            console.log("step away source_id");
+            source = Game.getObjectById(creep.memory.source_id) as Source
+        } else {
+            console.log("step away other");
+            source = creep.pos.findClosestByPath(FIND_SOURCES);
+        }
+        if (source) {
+            let step_dir = OtherWay[creep.pos.getDirectionTo(source.pos)];
+            console.log(`${creep.name} stepping ${step_dir}`);
+            creep.move(step_dir);
+        }
     }
 }

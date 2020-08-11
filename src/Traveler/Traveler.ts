@@ -575,26 +575,26 @@ export class Traveler {
      * @param cleanup
      */
 
-    public static patchMemory(cleanup = false) {
-        if (!Memory.empire) { return; }
-        if (!Memory.empire.hostileRooms) { return; }
-        let count = 0;
-        for (let roomName in Memory.empire.hostileRooms) {
-            if (Memory.empire.hostileRooms[roomName]) {
-                if (!Memory.rooms[roomName]) { Memory.rooms[roomName] = {} as any; }
-                Memory.rooms[roomName].avoid = 1;
-                count++;
-            }
-            if (cleanup) {
-                delete Memory.empire.hostileRooms[roomName];
-            }
-        }
-        if (cleanup) {
-            delete Memory.empire.hostileRooms;
-        }
+    // public static patchMemory(cleanup = false) {
+    //     if (!Memory.empire) { return; }
+    //     if (!Memory.empire.hostileRooms) { return; }
+    //     let count = 0;
+    //     for (let roomName in Memory.empire.hostileRooms) {
+    //         if (Memory.empire.hostileRooms[roomName]) {
+    //             if (!Memory.rooms[roomName]) { Memory.rooms[roomName] = {} as any; }
+    //             Memory.rooms[roomName].avoid = 1;
+    //             count++;
+    //         }
+    //         if (cleanup) {
+    //             delete Memory.empire.hostileRooms[roomName];
+    //         }
+    //     }
+    //     if (cleanup) {
+    //         delete Memory.empire.hostileRooms;
+    //     }
 
-        console.log(`TRAVELER: room avoidance data patched for ${count} rooms`);
-    }
+    //     console.log(`TRAVELER: room avoidance data patched for ${count} rooms`);
+    // }
 
     private static deserializeState(travelData: TravelData, destination: RoomPosition): TravelState {
         let state = {} as TravelState;

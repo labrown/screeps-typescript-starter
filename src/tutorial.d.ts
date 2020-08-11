@@ -3,7 +3,7 @@ interface CreepMemory {
     building?: boolean,
     upgrading?: boolean,
     loading?: boolean,
-    source_id?: string,
+    source_id?: Id<Source>,
     working?: boolean
 }
 
@@ -13,4 +13,8 @@ interface SpawnMemory {
 
 interface FlagMemory {
     roads_cleared?: boolean
+}
+
+interface Memory {
+  crit: any;
 }
